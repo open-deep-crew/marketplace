@@ -1,0 +1,45 @@
+{
+  "name": "my-marketplace",
+  "owner": {
+    "name": "Your Team",
+    "email": "team@example.com"
+  },
+  "description": "Atom marketplace for OpenDeepCrew",
+  "version": "1.0.0",
+  "metadata": {
+    "pluginRoot": "./"
+  },
+  "plugins": [
+    {
+      "name": "starter-workflow",
+      "description": "示例工作流：包含一个 command、一个 skill 和一个 hook",
+      "version": "1.0.0",
+      "source": "./",
+      "strict": false,
+      "category": "starter",
+      "keywords": ["starter", "example"],
+      "author": {
+        "name": "Your Team"
+      },
+      "commands": [
+        "./atoms/commands/hello.md"
+      ],
+      "skills": [
+        "./atoms/skills/hello-world"
+      ],
+      "hooks": {
+        "SessionStart": [
+          {
+            "hooks": [
+              {
+                "type": "command",
+                "command": "${CLAUDE_PLUGIN_ROOT}/atoms/hooks/session-start.sh",
+                "timeout": 5
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

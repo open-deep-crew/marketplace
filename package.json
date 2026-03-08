@@ -1,0 +1,12 @@
+{
+  "name": "opendeepcrew-marketplace",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Atom marketplace template for OpenDeepCrew",
+  "scripts": {
+    "generate-registry": "node scripts/generate-registry.js",
+    "test": "node scripts/generate-registry.js && echo 'Registry generated successfully!'"
+  },
+  "license": "MIT"
+}
