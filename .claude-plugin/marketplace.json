@@ -1,44 +1,56 @@
 {
-  "name": "my-marketplace",
+  "name": "claude-code-marketplaces",
   "owner": {
-    "name": "Your Team",
+    "name": "EOI Team",
     "email": "team@example.com"
   },
-  "description": "Atom marketplace for OpenDeepCrew",
+  "description": "Team-level Claude Code plugin marketplace with atomic component reuse",
   "version": "1.0.0",
   "metadata": {
     "pluginRoot": "./"
   },
   "plugins": [
     {
-      "name": "starter-workflow",
-      "description": "示例工作流：包含一个 command、一个 skill 和一个 hook",
-      "version": "1.0.0",
-      "source": "./",
-      "strict": false,
-      "category": "starter",
-      "keywords": ["starter", "example"],
-      "author": {
-        "name": "Your Team"
-      },
-      "commands": [
-        "./atoms/commands/hello.md"
-      ],
+      "name": "opendeepcrew-bug-fix",
+      "description": "opendeepcrew bugfix 工作流",
+      "category": "development",
+      "commands": [],
       "skills": [
-        "./atoms/skills/hello-world"
+        "./atoms/skills/skill-creator",
+        "./atoms/skills/git-workspace-init",
+        "./atoms/skills/bugfix"
       ],
-      "hooks": {
-        "SessionStart": [
-          {
-            "hooks": [
-              {
-                "type": "command",
-                "command": "${CLAUDE_PLUGIN_ROOT}/atoms/hooks/session-start.sh",
-                "timeout": 5
-              }
-            ]
-          }
-        ]
+      "hooks": [],
+      "agents": [
+        "./atoms/agents/matteo-collina.md",
+        "./atoms/agents/opendeepcrew-bug-fixer.md"
+      ],
+      "mcpServers": {}
+    },
+    {
+      "name": "opendeepcrew-product-dev",
+      "description": "opendeepcrew 需求开发",
+      "category": "development",
+      "commands": [],
+      "skills": [
+        "./atoms/skills/brainstorming",
+        "./atoms/skills/executing-plans",
+        "./atoms/skills/writing-plans",
+        "./atoms/skills/git-workspace-init"
+      ],
+      "hooks": [],
+      "agents": [
+        "./atoms/agents/matteo-collina.md",
+        "./atoms/agents/opendeepcrew-product-dev.md"
+      ],
+      "mcpServers": {
+        "claude-teams": {
+          "command": "uvx",
+          "args": [
+            "acpx-teams"
+          ],
+          "disabled": false
+        }
       }
     }
   ]

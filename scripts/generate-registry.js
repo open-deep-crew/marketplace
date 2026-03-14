@@ -42,8 +42,9 @@ function copyDirectory(src, dest) {
  * - agents/:   每个 .md 文件是一个 agent atom
  * - skills/:   每个子目录（含 SKILL.md）是一个 skill atom
  * - hooks/:    每个 .sh 文件是一个 hook atom
+ * - mcps/:     每个 mcp.json 中的 server key 是一个 mcp atom
  *
- * @returns {Map<string, object>} key = 相对路径（如 atoms/commands/bugfix-expert.md）
+ * @returns {Map<string, object>} key = 相对路径（如 atoms/commands/bugfix-expert.md）或 mcp server name
  */
 function scanAtomsDir(atomsDir) {
   const atomsMap = new Map();
@@ -79,6 +80,33 @@ function scanAtomsDir(atomsDir) {
 
       const relPath = `atoms/skills/${entry.name}/SKILL.md`;
       atomsMap.set(relPath, { type: 'skill', name: entry.name, path: relPath, usedBy: [] });
+    }
+  }
+
+  // mcps：解析 mcp.json 中的每个 server
+  const mcpsDir = path.join(atomsDir, 'mcps');
+  if (fs.existsSync(mcpsDir)) {
+    for (const entry of fs.readdirSync(mcpsDir, { withFileTypes: true })) {
+      if (!entry.isFile() || !/\.json$/.test(entry.name)) continue;
+      
+      const mcpJsonPath = path.join(mcpsDir, entry.name);
+      try {
+        const mcpConfig = JSON.parse(fs.readFileSync(mcpJsonPath, 'utf-8'));
+        const servers = mcpConfig.mcpServers || {};
+        
+        for (const serverName of Object.keys(servers)) {
+          const relPath = `atoms/mcps/${entry.name}`;
+          // 使用 serverName 作为 key，这样可以通过 plugin 的 mcpServers 引用
+          atomsMap.set(serverName, { 
+            type: 'mcp', 
+            name: serverName, 
+            path: relPath, 
+            usedBy: [] 
+          });
+        }
+      } catch (error) {
+        console.warn(`   ⚠ Failed to parse ${mcpJsonPath}: ${error.message}`);
+      }
     }
   }
 
@@ -128,6 +156,13 @@ function extractPluginAtomPaths(plugin) {
   for (const p of plugin.agents || []) paths.push(normalize(p));
   for (const p of plugin.skills || []) paths.push(normalizeSkillPath(normalize(p)));
   for (const p of extractHookPaths(plugin.hooks)) paths.push(normalize(p));
+  
+  // 添加 mcpServers 的引用（直接使用 server name 作为 key）
+  if (plugin.mcpServers && typeof plugin.mcpServers === 'object') {
+    for (const serverName of Object.keys(plugin.mcpServers)) {
+      paths.push(serverName);
+    }
+  }
 
   return paths;
 }
@@ -170,11 +205,12 @@ function generateRegistry() {
   console.log('   ✓ References resolved\n');
 
   // 4. 按类型分组 atoms
-  const grouped = { commands: [], agents: [], skills: [], hooks: [] };
+  const grouped = { commands: [], agents: [], skills: [], hooks: [], mcps: [] };
   for (const atom of atomsMap.values()) {
     const key = atom.type === 'command' ? 'commands'
       : atom.type === 'agent' ? 'agents'
       : atom.type === 'skill' ? 'skills'
+      : atom.type === 'mcp' ? 'mcps'
       : 'hooks';
     grouped[key].push(atom);
   }
@@ -189,6 +225,7 @@ function generateRegistry() {
       agents: grouped.agents.length,
       skills: grouped.skills.length,
       hooks: grouped.hooks.length,
+      mcps: grouped.mcps.length,
     },
   };
 
@@ -201,6 +238,7 @@ function generateRegistry() {
       agents: (plugin.agents || []).length,
       skills: (plugin.skills || []).length,
       hooks: extractHookPaths(plugin.hooks).length,
+      mcps: plugin.mcpServers ? Object.keys(plugin.mcpServers).length : 0,
     },
   }));
 
@@ -233,7 +271,7 @@ function generateRegistry() {
 
   console.log('✅ Done!\n');
   console.log(`   Plugins: ${stats.totalPlugins}  |  Atoms: ${stats.totalAtoms}`);
-  console.log(`   commands=${stats.byType.commands} agents=${stats.byType.agents} skills=${stats.byType.skills} hooks=${stats.byType.hooks}\n`);
+  console.log(`   commands=${stats.byType.commands} agents=${stats.byType.agents} skills=${stats.byType.skills} hooks=${stats.byType.hooks} mcps=${stats.byType.mcps}\n`);
 }
 
 try {

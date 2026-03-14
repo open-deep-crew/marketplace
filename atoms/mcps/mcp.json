@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "deepwiki": {
+      "type": "http",
+      "url": "https://mcp.deepwiki.com/mcp"
+    },
+    "claude-teams": {
+      "command": "uvx",
+      "args": [
+        "acpx-teams"
+      ],
+      "disabled": false
+    }
+  }
+}
