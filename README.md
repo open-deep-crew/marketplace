@@ -4,7 +4,7 @@
 
 > OpenDeepCrew 的 atom 市场模板仓库。Fork 后即可创建自己团队的插件市场。
 
-Atom 市场是 [OpenDeepCrew](https://github.com/open-deep-crew/opendeepcrew) 的插件源。将 commands、agents、skills、hooks 作为**原子（atoms）**管理，通过 plugins 自由组合成工作流。
+Atom 市场是 [OpenDeepCrew](https://github.com/open-deep-crew/opendeepcrew) 的插件源。将 commands、agents、skills、hooks、mcps 作为**原子（atoms）**管理，通过 plugins 自由组合成工作流。
 
 - **原子复用**：同一个 atom 可被多个 plugin 引用，改一处全部生效
 - **自由组合**：不同 plugin 按需组合 atoms，定义特定工作流
@@ -21,7 +21,8 @@ marketplace/
 │   ├── commands/                 # Slash commands（.md）
 │   ├── agents/                   # AI agents（.md，带 frontmatter）
 │   ├── skills/                   # Skills（目录，含 SKILL.md）
-│   └── hooks/                    # Event hooks（.sh）
+│   ├── hooks/                    # Event hooks（.sh）
+│   └── mcps/                     # MCP server 声明（mcp.json）
 ├── scripts/
 │   └── generate-registry.js      # 生成 registry.json（供前端/API 消费）
 └── package.json
@@ -107,6 +108,39 @@ echo "请使用中文回复。" >&2
 EOF
 chmod +x atoms/hooks/session-start-chinese.sh
 ```
+
+**添加 MCP Server：**
+
+[MCP（Model Context Protocol）](https://modelcontextprotocol.io/) 是一个开放协议，用于标准化 AI agent 与外部工具/数据源的通信。在 `atoms/mcps/` 下通过 `mcp.json` 声明 MCP server，OpenDeepCrew 创建工作区时会自动将其写入 agent 的 MCP 配置。
+
+```bash
+cat > atoms/mcps/mcp.json << 'EOF'
+{
+  "mcpServers": {
+    "deepwiki": {
+      "type": "http",
+      "url": "https://mcp.deepwiki.com/mcp"
+    },
+    "claude-teams": {
+      "command": "uvx",
+      "args": ["acpx-teams"],
+      "disabled": false
+    }
+  }
+}
+EOF
+```
+
+配置字段说明：
+
+| 字段 | 说明 |
+|------|------|
+| `command` | 启动命令（如 `npx`、`uvx`、`node`） |
+| `args` | 命令参数数组 |
+| `type` | 通信方式：`stdio`（默认）或 `http` |
+| `url` | HTTP 模式下的 server 地址 |
+| `env` | 环境变量，支持 `${VAR}` 引用宿主环境变量 |
+| `disabled` | 设为 `true` 可临时禁用 |
 
 ### 3. 组合成 Plugin
 
