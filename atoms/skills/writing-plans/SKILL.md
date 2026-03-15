@@ -103,4 +103,4 @@ git commit -m "feat: 添加特定功能"
 
     <计划内容>
     ```
-- 询问用户是否开始实施
+- 询问：“是否开始实施，使用 /executing-plans skill 实施实现计划”
