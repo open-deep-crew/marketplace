@@ -52,6 +52,139 @@
           "disabled": false
         }
       }
+    },
+    {
+      "name": "default_bot",
+      "description": "飞书bot私聊流程",
+      "category": "default",
+      "commands": [],
+      "skills": [
+        "./atoms/skills/skill-creator",
+        "./atoms/skills/agent-creator"
+      ],
+      "hooks": [],
+      "agents": [],
+      "mcpServers": {}
+    },
+    {
+      "name": "acpx-bug-fix",
+      "description": "acpx项目bugfix",
+      "category": "development",
+      "commands": [],
+      "skills": [
+        "./atoms/skills/bugfix",
+        "./atoms/skills/git-workspace-init"
+      ],
+      "hooks": [],
+      "agents": [
+        "./atoms/agents/matteo-collina.md",
+        "./atoms/agents/acpx-bug-fixer.md"
+      ],
+      "mcpServers": {
+        "claude-teams": {
+          "command": "uvx",
+          "args": [
+            "acpx-teams"
+          ],
+          "disabled": false
+        },
+        "deepwiki": {
+          "type": "http",
+          "url": "https://mcp.deepwiki.com/mcp"
+        }
+      }
+    },
+    {
+      "name": "acpx-product-dev",
+      "description": "acpx需求开发",
+      "category": "development",
+      "commands": [],
+      "skills": [
+        "./atoms/skills/brainstorming",
+        "./atoms/skills/executing-plans",
+        "./atoms/skills/git-workspace-init",
+        "./atoms/skills/writing-plans"
+      ],
+      "hooks": [
+        "session-start-chinese"
+      ],
+      "agents": [
+        "./atoms/agents/matteo-collina.md",
+        "./atoms/agents/acpx-product-dev.md"
+      ],
+      "mcpServers": {
+        "claude-teams": {
+          "command": "uvx",
+          "args": [
+            "acpx-teams"
+          ],
+          "disabled": false
+        }
+      }
+    },
+    {
+      "name": "opendeepcrew-qa",
+      "description": "opendeepcrew问答",
+      "category": "wiki",
+      "commands": [],
+      "skills": [],
+      "hooks": [],
+      "agents": [
+        "./atoms/agents/opendeepcrew-qa.md"
+      ],
+      "mcpServers": {}
+    },
+    {
+      "name": "writer-opendeepcrew",
+      "description": "写opendeecrew文章",
+      "category": "create",
+      "commands": [],
+      "skills": [
+        "./atoms/skills/nano-banana-pro"
+      ],
+      "hooks": [],
+      "agents": [],
+      "mcpServers": {
+        "promptx": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "@promptx/mcp-server"
+          ]
+        },
+        "claude-teams": {
+          "command": "uvx",
+          "args": [
+            "acpx-teams"
+          ],
+          "disabled": false
+        }
+      }
+    },
+    {
+      "name": "opendeepcrew-article-writer",
+      "description": "opendeepcrew技术架构文章",
+      "category": "wiki",
+      "commands": [],
+      "skills": [
+        "./atoms/skills/nano-banana-pro"
+      ],
+      "hooks": [
+        "session-start-chinese"
+      ],
+      "agents": [
+        "./atoms/agents/opendeepcrew-artich-writer.md",
+        "./atoms/agents/matteo-collina.md"
+      ],
+      "mcpServers": {
+        "claude-teams": {
+          "command": "uvx",
+          "args": [
+            "acpx-teams"
+          ],
+          "disabled": false
+        }
+      }
     }
   ]
 }

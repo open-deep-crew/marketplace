@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 # Git 工作空间初始化脚本
-# 用法: init_workspace.sh <repo_url> [workspace_dir] [branch_prefix]
+# 用法: init_workspace.sh <repo_url> [workspace_dir] [branch_name]
 #   repo_url:       Git 仓库 SSH/HTTPS 地址
 #   workspace_dir:  本地目录名，默认 "repo"
-#   branch_prefix:  分支前缀，如 fix、feat、chore，默认 "feat"
+#   branch_name:    完整分支名，如 feat/add-feishu-bot-config-2026-03-15
 
 set -euo pipefail
 
-REPO_URL="${1:?用法: init_workspace.sh <repo_url> [workspace_dir] [branch_prefix]}"
+REPO_URL="${1:?用法: init_workspace.sh <repo_url> [workspace_dir] [branch_name]}"
 WORKSPACE="${2:-repo}"
-PREFIX="${3:-feat}"
+BRANCH="${3:-}"
 
 # ── 1. Clone 或 Fetch ──
 if [ -d "$WORKSPACE/.git" ]; then
@@ -29,12 +29,13 @@ else
   git clone "$REPO_URL" "$WORKSPACE"
 fi
 
-# ── 2. 创建修复分支 ──
+# ── 2. 创建分支 ──
 cd "$WORKSPACE"
 
-SPACE_NAME=$(basename "$(cd .. && pwd)" | sed 's/^ws-//')
-DATE=$(date +%Y-%m-%d)
-BRANCH="${PREFIX}/${SPACE_NAME}-${DATE}"
+if [ -z "$BRANCH" ]; then
+  echo "❌ 未指定分支名，请由 AI 根据分支命名规范生成分支名并传入"
+  exit 1
+fi
 
 if git show-ref --verify --quiet "refs/heads/$BRANCH"; then
   echo "🔀 分支 $BRANCH 已存在，切换..."
