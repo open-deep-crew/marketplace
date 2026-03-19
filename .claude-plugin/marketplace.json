@@ -52,6 +52,57 @@
           "disabled": false
         }
       }
+    },
+    {
+      "name": "default_bot",
+      "description": "飞书bot私聊流程",
+      "category": "default",
+      "commands": [],
+      "skills": [
+        "./atoms/skills/skill-creator",
+        "./atoms/skills/agent-creator",
+        "./atoms/skills/opendeepcrew-cli"
+      ],
+      "hooks": [],
+      "agents": [],
+      "mcpServers": {}
+    },
+    {
+      "name": "opendeepcrew-qa",
+      "description": "opendeepcrew问答",
+      "category": "wiki",
+      "commands": [],
+      "skills": [],
+      "hooks": [],
+      "agents": [
+        "./atoms/agents/opendeepcrew-qa.md"
+      ],
+      "mcpServers": {}
+    },
+    {
+      "name": "superpowers-dev",
+      "description": "通用需求开发工作流，支持任意Git仓库",
+      "category": "development",
+      "commands": [],
+      "skills": [
+        "./atoms/skills/brainstorming",
+        "./atoms/skills/executing-plans",
+        "./atoms/skills/writing-plans",
+        "./atoms/skills/git-workspace-init"
+      ],
+      "hooks": [],
+      "agents": [
+        "./atoms/agents/superpowers-dev.md"
+      ],
+      "mcpServers": {
+        "claude-teams": {
+          "command": "uvx",
+          "args": [
+            "acpx-teams"
+          ],
+          "disabled": false
+        }
+      }
     }
   ]
 }
