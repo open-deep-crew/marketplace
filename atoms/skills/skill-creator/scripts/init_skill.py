@@ -5,7 +5,7 @@ Skill 初始化器 - 从模板创建新的 Skill
 用法：
     init_skill.py <skill-name>
 
-输出路径通过执行 `opendeepcrew marketplace repodir` 命令自动获取。
+在当前工作目录下创建 Skill 目录。创建完成后，使用 `opendeepcrew atom add` 注册到 marketplace。
 
 示例：
     init_skill.py my-new-skill
@@ -14,28 +14,7 @@ Skill 初始化器 - 从模板创建新的 Skill
 """
 
 import sys
-import subprocess
 from pathlib import Path
-
-
-def get_repo_dir():
-    """通过执行 opendeepcrew marketplace repodir 命令获取输出路径。"""
-    try:
-        result = subprocess.run(
-            ['opendeepcrew', 'marketplace', 'repodir'],
-            capture_output=True, text=True, check=True
-        )
-        repo_dir = result.stdout.strip()
-        if not repo_dir:
-            print("❌ 错误：opendeepcrew marketplace repodir 返回了空路径")
-            sys.exit(1)
-        return str(Path(repo_dir) / 'atoms' / 'skills')
-    except FileNotFoundError:
-        print("❌ 错误：未找到 opendeepcrew 命令，请确保已安装并在 PATH 中")
-        sys.exit(1)
-    except subprocess.CalledProcessError as e:
-        print(f"❌ 错误：执行 opendeepcrew marketplace repodir 失败：{e.stderr.strip()}")
-        sys.exit(1)
 
 
 SKILL_TEMPLATE = """---
@@ -295,7 +274,7 @@ def init_skill(skill_name, path):
 def main():
     if len(sys.argv) < 2:
         print("用法：init_skill.py <skill-name>")
-        print("\n输出路径通过执行 `opendeepcrew marketplace repodir` 命令自动获取。")
+        print("\nSkill 将在当前工作目录下创建。")
         print("\nSkill 名称要求：")
         print("  - 连字符分隔的标识符（例如 'data-analyzer'）")
         print("  - 仅限小写字母、数字和连字符")
@@ -308,7 +287,7 @@ def main():
         sys.exit(1)
 
     skill_name = sys.argv[1]
-    path = get_repo_dir()
+    path = Path.cwd()
 
     print(f"🚀 正在初始化 Skill：{skill_name}")
     print(f"   位置：{path}")
@@ -317,6 +296,14 @@ def main():
     result = init_skill(skill_name, path)
 
     if result:
+        print(f"\n📋 注册到 marketplace：")
+        print(f"   opendeepcrew atom add ./{skill_name} --type skill --force")
+        print(f"\n📋 修改现有 skill 的工作流：")
+        print(f"   1. opendeepcrew atom files skill <name>          # 列出文件")
+        print(f"   2. opendeepcrew atom show skill <name>           # 读主文件")
+        print(f"   3. opendeepcrew atom show skill <name> --file <path>  # 读子文件")
+        print(f"   4. 保存到本地目录，编辑后：")
+        print(f"      opendeepcrew atom add ./<name> --type skill --force  # 覆盖更新")
         sys.exit(0)
     else:
         sys.exit(1)

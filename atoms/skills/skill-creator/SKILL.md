@@ -267,7 +267,7 @@ scripts/init_skill.py <skill-name>
 
 该脚本：
 
-- 在自动获取的路径下创建 Skill 目录
+- 在当前工作目录下创建 Skill 目录
 - 生成带有正确 frontmatter 和 TODO 占位符的 SKILL.md 模板
 - 创建示例资源目录：`scripts/`、`references/` 和 `assets/`
 - 在每个目录中添加可自定义或删除的示例文件
@@ -334,13 +334,13 @@ scripts/quick_validate.py <path/to/skill-folder>
 
 ### 步骤 6：注册 Skill
 
-验证通过后，运行以下命令更新 marketplace 注册文件：
+验证通过后，运行以下命令将 Skill 注册到 marketplace：
 
 ```bash
-opendeepcrew marketplace regenerate
+opendeepcrew atom add ./<skill-name> --type skill --force
 ```
 
-该命令会扫描所有 Skill 并重新生成 marketplace 注册信息，确保新创建或修改的 Skill 被正确注册和发现。
+该命令会自动完成 git commit 和 marketplace 注册，确保新创建或修改的 Skill 被正确注册和发现。
 
 ### 步骤 7：迭代
 
@@ -352,3 +352,11 @@ opendeepcrew marketplace regenerate
 2. 注意困难或低效之处
 3. 确定 SKILL.md 或捆绑资源应如何更新
 4. 实施更改并再次测试
+
+**修改现有 Skill 的工作流：**
+
+1. `opendeepcrew atom files skill <name>` — 列出 Skill 包含的所有文件
+2. `opendeepcrew atom show skill <name>` — 读取主文件（SKILL.md）内容
+3. `opendeepcrew atom show skill <name> --file <path>` — 读取子文件内容
+4. 将内容保存到本地目录，进行编辑
+5. `opendeepcrew atom add ./<name> --type skill --force` — 覆盖更新到 marketplace

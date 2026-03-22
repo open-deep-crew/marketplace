@@ -20,7 +20,34 @@ const MARKETPLACE_PATH = path.join(ROOT_DIR, '.claude-plugin/marketplace.json');
 const ATOMS_DIR = path.join(ROOT_DIR, 'atoms');
 const OUTPUT_DIR = path.join(ROOT_DIR, 'public/generated');
 const OUTPUT_PATH = path.join(OUTPUT_DIR, 'registry.json');
+// ─── YAML frontmatter 解析 ───────────────────────────────────────────────────
+
+/**
+ * 从 .md 文件中提取 YAML frontmatter 的 description 字段
+ */
+function extractDescription(filePath) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf-8');
+    const match = content.match(/^---\n([\s\S]*?)\n---/);
+    if (!match) return undefined;
+    const descLine = match[1].match(/^description:\s*(.+)$/m);
+    return descLine ? descLine[1].trim() : undefined;
+  } catch { return undefined; }
+}
+
 // ─── 文件系统扫描 ────────────────────────────────────────────────────────────
+
+/**
+ * 递归复制目录
+ */
+function copyDirectory(src, dest) {
+  if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true });
+  for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+    const srcPath = path.join(src, entry.name);
+    const destPath = path.join(dest, entry.name);
+    entry.isDirectory() ? copyDirectory(srcPath, destPath) : fs.copyFileSync(srcPath, destPath);
+  }
+}
 
 /**
  * 扫描 atoms/ 目录，返回所有 atom 的基础信息
@@ -52,7 +79,8 @@ function scanAtomsDir(atomsDir) {
 
       const relPath = `atoms/${dir}/${entry.name}`;
       const name = entry.name.replace(/\.(md|sh)$/, '');
-      atomsMap.set(relPath, { type, name, path: relPath, usedBy: [] });
+      const description = entry.name.endsWith('.md') ? extractDescription(path.join(dirPath, entry.name)) : undefined;
+      atomsMap.set(relPath, { type, name, ...(description && { description }), path: relPath, usedBy: [] });
     }
   }
 
@@ -65,7 +93,8 @@ function scanAtomsDir(atomsDir) {
       if (!fs.existsSync(skillMdPath)) continue;
 
       const relPath = `atoms/skills/${entry.name}/SKILL.md`;
-      atomsMap.set(relPath, { type: 'skill', name: entry.name, path: relPath, usedBy: [] });
+      const description = extractDescription(skillMdPath);
+      atomsMap.set(relPath, { type: 'skill', name: entry.name, ...(description && { description }), path: relPath, usedBy: [] });
     }
   }
 

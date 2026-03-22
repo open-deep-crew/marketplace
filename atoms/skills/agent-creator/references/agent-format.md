@@ -2,7 +2,7 @@
 
 ## 文件结构
 
-Agent 是一个 `.md` 文件，存放在 `<repodir>/atoms/agents/` 目录下。
+Agent 是一个 `.md` 文件，通过 `opendeepcrew atom add ./<agent-name>.md --type agent --force` 注册到 marketplace。
 
 ```
 ---

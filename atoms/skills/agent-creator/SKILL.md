@@ -27,7 +27,7 @@ description: 创建和修改 Agent 的指南。当用户想要创建新的 Agent
 python3 <skill-path>/scripts/init_agent.py <agent-name>
 ```
 
-文件将创建在 `<repodir>/atoms/agents/<agent-name>.md`。
+文件将创建在当前工作目录下：`./<agent-name>.md`。
 
 ### 3. 编写 Agent
 
@@ -47,11 +47,13 @@ python3 <skill-path>/scripts/init_agent.py <agent-name>
 ### 4. 注册 Agent
 
 ```bash
-opendeepcrew marketplace regenerate
+opendeepcrew atom add ./<agent-name>.md --type agent --force
 ```
+
+该命令会自动完成 git commit 和 marketplace 注册。
 
 ## 修改流程
 
-1. 读取 `<repodir>/atoms/agents/` 下的目标 Agent 文件
+1. `opendeepcrew atom show agent <name>` — 读取目标 Agent 内容，保存到本地文件
 2. 根据用户需求修改内容
-3. 运行 `opendeepcrew marketplace regenerate` 更新注册
+3. `opendeepcrew atom add ./<agent-name>.md --type agent --force` — 覆盖更新到 marketplace

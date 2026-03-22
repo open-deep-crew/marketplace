@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-03-19T16:28:27.116Z",
+    "generatedAt": "2026-03-22T09:41:25.234Z",
     "version": "1.0.0",
     "marketplace": "claude-code-marketplaces"
   },
@@ -21,6 +21,7 @@
       {
         "type": "agent",
         "name": "matteo-collina",
+        "description": "Node.js 后端架构专家分身 — Pino 作者、Fastify Lead Maintainer、Node.js TSC 成员。专注于分层架构重构、插件系统设计、日志与可观测性、渐进式 TypeScript 迁移。",
         "path": "atoms/agents/matteo-collina.md",
         "usedBy": [
           "opendeepcrew-bug-fix",
@@ -30,6 +31,7 @@
       {
         "type": "agent",
         "name": "opendeepcrew-bug-fixer",
+        "description": "opendeepcrew 仓库的 bug 分析与修复专家。自动 clone 仓库、创建修复分支，引导用户描述并定位 bug，给出修复方案并提交代码。",
         "path": "atoms/agents/opendeepcrew-bug-fixer.md",
         "usedBy": [
           "opendeepcrew-bug-fix"
@@ -38,6 +40,7 @@
       {
         "type": "agent",
         "name": "opendeepcrew-product-dev",
+        "description": "opendeepcrew 仓库的需求开发专家。自动 clone 仓库、创建开发分支，通过头脑风暴确认设计方案，编写实施计划，分阶段执行并提交代码。",
         "path": "atoms/agents/opendeepcrew-product-dev.md",
         "usedBy": [
           "opendeepcrew-product-dev"
@@ -46,6 +49,7 @@
       {
         "type": "agent",
         "name": "opendeepcrew-qa",
+        "description": "OpenDeepCrew 项目的只读问答专家。回答关于 acpx、opendeepcrew、acpx-teams-mcp 三个仓库的代码、架构、用法等问题。只做代码阅读和解答，不做任何代码修改。",
         "path": "atoms/agents/opendeepcrew-qa.md",
         "usedBy": [
           "opendeepcrew-qa"
@@ -54,6 +58,7 @@
       {
         "type": "agent",
         "name": "superpowers-dev",
+        "description": "通用需求开发专家。支持任意 Git 仓库，引导用户输入仓库地址后，通过头脑风暴确认设计方案，编写实施计划，分阶段执行并提交代码。",
         "path": "atoms/agents/superpowers-dev.md",
         "usedBy": [
           "superpowers-dev"
@@ -64,6 +69,7 @@
       {
         "type": "skill",
         "name": "agent-creator",
+        "description": "创建和修改 Agent 的指南。当用户想要创建新的 Agent 或修改现有 Agent 时使用此 Skill。Agent 是定义 AI 角色、行为准则和工作流程的 Markdown 文件，存放在 marketplace 的 atoms/agents 目录下。",
         "path": "atoms/skills/agent-creator/SKILL.md",
         "usedBy": [
           "default_bot"
@@ -72,6 +78,7 @@
       {
         "type": "skill",
         "name": "brainstorming",
+        "description": "\"在进行任何创造性工作之前，你必须使用此工具——无论是创建功能、构建组件、添加功能还是修改行为。在实施前探索用户意图、需求和设计。\"",
         "path": "atoms/skills/brainstorming/SKILL.md",
         "usedBy": [
           "opendeepcrew-product-dev",
@@ -81,6 +88,7 @@
       {
         "type": "skill",
         "name": "bugfix",
+        "description": "专业的 Bug 诊断和修复流程。主动用于调试错误、测试失败、类型错误、逻辑问题、数据问题、状态管理问题或任何异常行为。在遇到 bug、错误或系统故障时自动调用。",
         "path": "atoms/skills/bugfix/SKILL.md",
         "usedBy": [
           "opendeepcrew-bug-fix"
@@ -89,6 +97,7 @@
       {
         "type": "skill",
         "name": "executing-plans",
+        "description": "适用于你已有书面实施计划，需在独立环节中分阶段执行并设置审核检查点的场景。",
         "path": "atoms/skills/executing-plans/SKILL.md",
         "usedBy": [
           "opendeepcrew-product-dev",
@@ -98,6 +107,7 @@
       {
         "type": "skill",
         "name": "git-workspace-init",
+        "description": "Git 仓库工作空间初始化流程。当会话启动时需要 clone 仓库、创建修复分支并输出环境信息时使用此 Skill。适用于 bug 修复、功能开发等需要在本地初始化 Git 工作空间的场景。触发词包括：初始化仓库、clone 项目、准备工作空间、开始修复。",
         "path": "atoms/skills/git-workspace-init/SKILL.md",
         "usedBy": [
           "opendeepcrew-bug-fix",
@@ -108,12 +118,14 @@
       {
         "type": "skill",
         "name": "nano-banana-pro",
+        "description": "使用谷歌的 Nano Banana Pro（Gemini 3 Pro 图片）API 生成和编辑图片。当用户请求生成、创建、编辑、修改、修改、修改或更新图像时使用。当用户引用已有的图片文件并请求以任何方式修改时，也要使用（例如，“修改此图像”、“更改背景”、“用 Y 替换 X”）。支持文本生成和图像对图像编辑，分辨率可配置（默认 1K，高分辨率为 2K 或 4K）。千万不要先读图片文件——直接用这个技能配合 --input-image 参数。",
         "path": "atoms/skills/nano-banana-pro/SKILL.md",
         "usedBy": []
       },
       {
         "type": "skill",
         "name": "opendeepcrew-cli",
+        "description": "Use opendeepcrew CLI to manage marketplace atoms/plugins, workspaces, server, and configuration. Covers all commands, output modes, error codes, and AI-agent integration patterns.",
         "path": "atoms/skills/opendeepcrew-cli/SKILL.md",
         "usedBy": [
           "default_bot"
@@ -122,6 +134,7 @@
       {
         "type": "skill",
         "name": "skill-creator",
+        "description": "创建高效 Skill 的指南。当用户想要创建新的 Skill（或更新现有 Skill）以扩展 Claude 的能力时使用此 Skill，包括专业知识、工作流程或工具集成。",
         "path": "atoms/skills/skill-creator/SKILL.md",
         "usedBy": [
           "opendeepcrew-bug-fix",
@@ -131,12 +144,14 @@
       {
         "type": "skill",
         "name": "wiki-generator",
+        "description": "自动生成项目技术 Wiki 文档。当用户说\"生成XXX的wiki\"、\"为XXX创建wiki\"、\"写XXX的文档\"、\"生成XXX文档\"、\"记录XXX\"、\"编写XXX说明\"、\"XXX的技术文档\"、\"帮我写XXX的wiki\"时立即使用。支持API文档、功能模块文档、架构说明、状态回调文档、业务流程文档等所有类型wiki生成。自动识别相关源文件，生成包含Mermaid架构图、流程图、序列图、数据结构表格、代码示例、源码引用的完整Markdown文档，输出到docs/wiki/目录。",
         "path": "atoms/skills/wiki-generator/SKILL.md",
         "usedBy": []
       },
       {
         "type": "skill",
         "name": "writing-plans",
+        "description": "当您有多步任务的规范或要求时，在生成代码之前使用",
         "path": "atoms/skills/writing-plans/SKILL.md",
         "usedBy": [
           "opendeepcrew-product-dev",
