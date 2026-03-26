@@ -61,7 +61,8 @@
       "skills": [
         "./atoms/skills/agent-creator",
         "./atoms/skills/odc-cli",
-        "./atoms/skills/skill-creator"
+        "./atoms/skills/skill-creator",
+        "./atoms/skills/wecom-group"
       ],
       "hooks": [],
       "agents": [
