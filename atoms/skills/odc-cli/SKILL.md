@@ -1,627 +1,210 @@
 ---
 name: odc-cli
-description: Use odc CLI to manage marketplace atoms/plugins, subscriptions, workspaces, server, and configuration. Covers all commands, output modes, error codes, and AI-agent integration patterns.
+description: 使用 odc CLI 管理 marketplace 的 atoms/plugins、订阅源、工作空间、服务器和配置。当用户提到列出技能、添加 atom、创建插件、合并插件、管理工作空间等 odc 操作时使用此技能——即使用户没有明确说"odc"。
 ---
 
 # odc CLI
 
-## When to use this skill
+`odc` 是一个用于编排 AI 编码 agent 团队的 CLI 工具。它管理一个本地 marketplace，包含可复用组件（atoms：commands、skills、hooks、agents、MCP servers）和插件（plugins：一组 atoms 的集合），以及 agent 运行的工作空间（workspaces）。
 
-Use this skill when you need to:
+本文档聚焦高频场景及其最优调用链。完整命令参考请按需读取对应文件：
 
-- Manage marketplace content (atoms, plugins, registry, subscriptions)
-- List, open, or update workspaces
-- Start or configure the odc server
-- Read or modify odc configuration
-- Integrate odc operations into automation scripts or AI agent workflows
+- `references/global.md` — 输出模式、全局选项、错误码、`--force` 行为
+- `references/atom.md` — atom show / files / add / update / delete / set-inject
+- `references/plugin.md` — plugin list / add / update / merge / delete
+- `references/marketplace.md` — marketplace show / sync / history / rollback / regenerate
+- `references/subscription.md` — subscription list / add / remove / enable / disable / refresh
+- `references/workspace.md` — workspace list / show / open / init / reinit / update / add-plugin / remove-plugin
+- `references/server-config.md` — 服务器启动、配置管理
 
-## What odc CLI is
+## 核心约束
 
-`odc` is a CLI for orchestrating AI coding agent teams. It manages a local marketplace of reusable components (atoms: commands, skills, hooks, agents, MCP servers) and plugins (bundles of atoms), plus workspaces where agents operate.
+以下约束不可违反，影响所有场景：
 
-Core capabilities:
+1. **没有 `atom list` 命令。** 要枚举 atoms，使用 `plugin list --json`（按插件查看）或 `marketplace show`（完整注册表）。
+2. **本地插件只能引用本地 atoms。** 订阅源的 atoms 必须先通过 `plugin merge` 合并到本地，本地插件才能引用它们。
+3. **`plugin list --json` 返回所有插件**（本地 + 所有订阅源）。同名插件可能出现多次但 `source.type` 不同。始终通过 **name + source** 共同匹配。
+4. **获取当前工作空间信息优先读 `.aiworkspace.json`**，它包含 workspace name、plugins、agent type、permission mode。只有在需要其他工作空间信息时才用 `workspace show`。要获取 plugin 的 atom 详情，仍需 `plugin list --json`。
+5. **非 TTY 环境自动输出 JSON。** 通过 Bash 工具调用 odc 时，输出默认为 JSON。第一行可能是 dotenv 注入信息——解析时需处理。
+6. **非 TTY 环境下破坏性操作需要 `--force`。** `atom add`（覆盖）、`atom delete`、`plugin delete`、`marketplace rollback` 都需要 `--force` 跳过确认。
 
-- Marketplace atom CRUD with git version tracking
-- Multiple marketplace subscriptions (clone, refresh, enable/disable)
-- Plugin assembly from atoms (interactive and non-interactive)
-- Workspace listing, detail view, opening in IDE, initialization, reinitialization, and configuration
-- Server lifecycle with auto-restart
-- Configuration management (env-based, `~/.odc/.env`)
-- AI-first design: auto-detects TTY vs non-TTY, outputs JSON for automation
-- Structured error codes for programmatic error handling
-- `--force` flag on destructive operations for non-interactive use
+## 高频场景 Playbook
 
-## Install
+### Playbook 1：查询当前工作空间的 Atoms
 
-```bash
-npm install -g @odc/odc
-```
-
-## Output modes
-
-The CLI auto-detects the output mode:
-
-| Environment | Default output | Override |
-|---|---|---|
-| TTY (terminal) | Human-readable (tables, colors) | `--json` forces JSON |
-| Non-TTY (pipe, AI agent) | JSON | `--pretty` forces human-readable |
-
-This means AI agents calling the CLI via `exec`/`spawn` automatically get JSON without needing `--json`.
-
-## Command model
+**用户意图：** "当前空间有哪些技能/agent/命令"
 
 ```
-odc [global_options] <command> [subcommand] [options] [arguments]
+步骤 1：读取当前工作空间目录下的 .aiworkspace.json
+        → 包含 workspace name、plugins 数组（每项有 name + source）
+        → 直接读本地文件，无需 CLI 调用
+
+步骤 2：odc plugin list --json
+        → 通过 name 和 source.type/source.name 共同匹配每个插件
+        → 提取匹配插件的 skills/agents/commands/mcpServers
+
+步骤 3：去重后展示给用户
+        → 标注每个 atom 来自哪个插件
 ```
 
-## Global options
+**如何获取工作空间上下文：** 每个 odc 工作空间目录下都有一个 `.aiworkspace.json` 文件，包含工作空间名称、挂载的插件、agent 类型和权限模式。直接读取此文件，比调用 `workspace show` 更快且省一次 CLI 调用。
 
-| Option | Description |
+### Playbook 2：将工作空间转为单个本地插件
+
+**用户意图：** "把当前工作空间打包成一个本地 plugin，方便下次直接用"
+
+一个工作空间可能挂载多个插件（本地 + 订阅源）。此 playbook 创建一个包含所有 atoms 的本地插件。
+
+```
+步骤 1：读取当前工作空间目录下的 .aiworkspace.json
+        → 获取工作空间名称、所有挂载的插件及其来源
+
+步骤 2：odc plugin list --json
+        → 按 name + source 匹配每个挂载的插件
+        → 收集所有插件的 atoms（skills、agents、commands、mcpServers）
+
+步骤 3：对列表中的每个订阅源插件执行：
+        odc plugin merge <订阅源插件名> --source <订阅源名称>
+        → 将订阅源 atoms 复制到本地 marketplace
+        → 必须执行：本地插件无法引用订阅源 atoms
+
+步骤 4：odc plugin add <新插件名> \
+          --description "<描述>" \
+          --category <分类> \
+          --skills "<去重后的逗号分隔技能名>" \
+          --agents "<agent 名>" \
+          --commands "<命令名>" \
+          --mcps '<mcpServers JSON>'
+        → 创建合并后的本地插件
+
+步骤 5：odc plugin list --json
+        → 校验：按新插件名 + source.type=local 过滤
+        → 确认 atom 数量符合预期
+```
+
+**要点：**
+- 创建前先对所有插件的 atom 名称去重。
+- MCP servers 需要以 JSON 字符串传给 `--mcps`。
+- 创建前询问用户新插件的名称。
+
+### Playbook 3：给插件添加 Atom
+
+**用户意图：** "把 xxx skill 加到 xxx plugin 里"
+
+atom 来源可以是：本地路径、GitHub URL、订阅源、或已在本地 marketplace 中。
+
+```
+步骤 1：将 atom 添加到本地 marketplace（如果还不在的话）
+
+        来自 GitHub URL：
+        odc atom add <github-url> --type <type> --force
+
+        来自本地路径：
+        odc atom add <本地路径> --type <type> --force
+
+        来自订阅源（必须先合并）：
+        odc plugin merge <订阅源插件名> --source <订阅源名称>
+
+        已在本地：跳过此步骤。
+
+步骤 2：检查目标插件是否已包含此 atom
+        odc plugin list --json
+        → 按 name + source 匹配目标插件
+        → 检查 atom 名称是否已存在于对应数组（skills/agents/commands）中
+
+步骤 3：如果已包含：
+        → 询问用户："该插件已包含 <atom-name>，是否要覆盖？"
+        → 用户确认：继续执行步骤 4
+        → 用户拒绝：停止
+
+步骤 4：将 atom 添加到插件
+        odc plugin update <插件名> --add-skills "<atom-name>"
+        （或 --add-agents / --add-commands，取决于 atom 类型）
+
+步骤 5：校验
+        odc plugin list --json → 确认 atom 出现在插件中
+```
+
+**说明：** `--add-skills` 即使名称已存在也会添加（会重新指向引用）。对于 atom 内容更新（如用 GitHub 版本覆盖），步骤 1 的 `--force` 处理内容更新；步骤 4 确保插件引用是最新的。
+
+### Playbook 4：将插件合并到本地插件
+
+**用户意图：** "将某个插件合并到本地的某个插件中"
+
+两种情况：来源是订阅源插件，或来源是另一个本地插件。
+
+**情况 A：来源是订阅源插件**
+
+```
+步骤 1：odc plugin merge <目标本地插件> --source <订阅源名称>
+        → 将订阅源插件的所有 atoms 批量复制到本地 marketplace
+        → 同名 atoms 会被强制覆盖
+        → 自动重建注册表
+
+步骤 2：odc plugin list --json
+        → 校验目标插件是否已包含合并的 atoms
+```
+
+**说明：** `plugin merge` 一条命令同时完成 atom 复制和目标插件装配更新，是最高效的路径。
+
+**情况 B：来源是另一个本地插件**
+
+```
+步骤 1：odc plugin list --json
+        → 获取源插件和目标插件的 atom 列表
+
+步骤 2：对每种 atom 类型（skills、agents、commands、mcps）：
+        → 识别源插件有但目标插件没有的 atoms
+        → 识别两者都有的 atoms（潜在冲突）
+
+步骤 3：如果有重名 atoms，询问用户冲突解决策略
+
+步骤 4：odc plugin update <目标插件> \
+          --add-skills "<要添加的技能>" \
+          --add-agents "<要添加的 agents>" \
+          --add-commands "<要添加的命令>" \
+          --add-mcps '<要添加的 mcps JSON>'
+
+步骤 5：odc plugin list --json → 校验结果
+```
+
+### Playbook 5：注册表故障排查
+
+**用户意图：** "atom 找不到" / "注册表不对" / E2002 错误
+
+```
+步骤 1：odc marketplace regenerate
+        → 从磁盘重建注册表，修复过期索引
+
+步骤 2：odc marketplace show
+        → 检查完整注册表，确认 atom 是否存在
+
+步骤 3：如果 atom 仍然缺失：
+        → 检查是否被删除或从未添加
+        → 如需要，用 odc atom add 重新添加
+```
+
+## 命令速查表
+
+| 操作 | 命令 |
 |---|---|
-| `-V, --version` | Output version number |
-| `--json` | Force JSON output |
-| `--pretty` | Force human-readable output |
-| `--no-color` | Disable colored output |
-| `--verbose` | Enable debug logging |
-| `-h, --help` | Display help |
-
-## Commands
-
-### server
-
-Start the odc server.
-
-```bash
-odc server
-odc server --port 8080
-```
-
-Behavior:
-- On first run, auto-detects missing config and runs interactive setup (TTY) or generates defaults (non-TTY)
-- Spawns server as a child process with auto-restart on exit code 120
-- Forwards SIGINT/SIGTERM to child process for graceful shutdown
-- Port priority: `--port` flag > `PORT` env var > config file > default 4000
-
-### config
-
-Manage configuration stored in `~/.odc/.env`.
-
-```bash
-odc config show              # Display all config
-odc config get <key>         # Get single value
-odc config set <key> <value> # Set single value
-```
-
-Examples:
-
-```bash
-# Human-readable
-odc config show
-
-# JSON output (non-TTY auto or explicit)
-odc config show --json
-
-# Get port
-odc config get PORT
-
-# Set marketplace source
-odc config set MARKETPLACE_SOURCE https://github.com/org/marketplace.git
-```
-
-### atom
-
-Manage marketplace atoms (commands, skills, hooks, agents, MCP servers).
-
-```bash
-odc atom show <type> <name> [--file <path>]
-odc atom files <type> <name>
-odc atom add <source> --type <type> [options] [-f|--force]
-odc atom update <name> [options]
-odc atom delete <type> <name> [-f|--force]
-odc atom set-inject <name> [value] [--remove]
-```
-
-To enumerate atoms, use `marketplace show` (full registry JSON) or inspect the marketplace repo; there is no `atom list` subcommand.
-
-Valid types: `command`, `agent`, `skill`, `hook`, `mcp`
-
-#### atom show
-
-```bash
-odc atom show skill my-skill
-odc atom show mcp my-server
-odc atom show skill my-skill --file references/best-practices.md
-```
-
-Returns atom content. For MCP, returns the server configuration JSON.
-
-Use `--file <path>` to read a specific sub-file within a directory-type atom. Use `atom files` first to discover available files.
-
-#### atom files
-
-```bash
-odc atom files skill my-skill
-odc atom files skill my-skill --json
-```
-
-Lists all files in a directory-type atom. Returns `null`/E2002 for single-file atoms. Useful for discovering reference files, scripts, or other resources bundled with an atom.
-
-Example workflow for AI agents:
-```bash
-# 1. List files to discover structure
-odc atom files skill nodejs-cli-best-practices
-# ["SKILL.md", "references/best-practices.md"]
-
-# 2. Read the main skill
-odc atom show skill nodejs-cli-best-practices
-
-# 3. Read a referenced file
-odc atom show skill nodejs-cli-best-practices --file references/best-practices.md
-```
-
-#### atom add
-
-From local path:
-
-```bash
-odc atom add ./my-skill.md --type skill
-odc atom add ./my-agent/ --type agent
-```
-
-From git URL:
-
-```bash
-odc atom add https://github.com/org/repo/tree/main/skills/foo --type skill
-```
-
-Add MCP server:
-
-```bash
-odc atom add my-mcp --type mcp \
-  --command npx \
-  --args my-mcp-server \
-  --env API_KEY=xxx
-```
-
-MCP-specific options:
-- `--transport <type>`: stdio (default), http, sse
-- `--command <cmd>`: Server start command
-- `--args <args...>`: Command arguments
-- `--url <url>`: Server URL (http/sse)
-- `--env <KEY=VALUE...>`: Environment variables
-
-If target already exists:
-- TTY without `--force`: prompts for confirmation
-- Non-TTY without `--force`: errors with E0001
-- `--force`: overwrites silently
-
-All add operations auto-commit to marketplace git and regenerate registry.
-
-#### atom update (MCP only)
-
-Update an existing MCP server's configuration. Merges with existing config (does not replace).
-
-```bash
-odc atom update my-mcp --command new-cmd
-odc atom update my-mcp --args arg1 arg2
-odc atom update my-mcp --env NEW_KEY=value
-odc atom update my-mcp --transport http --url https://example.com/mcp
-```
-
-Options are the same as `atom add --type mcp`. Only specified fields are updated; unspecified fields keep their current values.
-
-#### atom delete
-
-```bash
-odc atom delete skill my-skill           # TTY: prompts confirmation
-odc atom delete skill my-skill --force    # Skip confirmation
-```
-
-#### atom set-inject
-
-Set or remove an agent’s inject marker (e.g. `init` for injection behavior). Regenerates the registry and commits to marketplace git.
-
-```bash
-odc atom set-inject my-agent init        # set inject to init
-odc atom set-inject my-agent --remove    # remove inject marker
-```
-
-- `<name>`: agent name
-- `[value]`: inject value (e.g. `init`); must supply either this or `--remove`, otherwise E0001
-
-### plugin
-
-Manage plugins (bundles of atoms).
-
-```bash
-odc plugin list
-odc plugin create
-odc plugin add <name> [options]
-odc plugin update <name> [options]
-odc plugin edit [name]
-odc plugin delete [name] [-f|--force]
-```
-
-#### plugin list
-
-```bash
-odc plugin list          # Table: NAME, DESCRIPTION, ATOMS, MCPS
-odc plugin list --json   # JSON array
-```
-
-#### plugin create (interactive, TTY only)
-
-```bash
-odc plugin create
-```
-
-Step-by-step prompts: name → description → category → select commands → select skills → select agents → select MCPs → confirm.
-
-Non-TTY throws E0001 with guidance to use `plugin add`.
-
-#### plugin add (non-interactive)
-
-```bash
-odc plugin add my-plugin \
-  --description "My plugin" \
-  --category development \
-  --skills "skill-a,skill-b" \
-  --commands "cmd-a" \
-  --agents "agent-a" \
-  --mcps '{"server-a":{"command":"npx","args":["my-mcp"]}}'
-```
-
-Options:
-- `--description <desc>`: Plugin description
-- `--category <cat>`: Category
-- `--skills <list>`: Comma-separated skill names
-- `--commands <list>`: Comma-separated command names
-- `--agents <list>`: Comma-separated agent names
-- `--mcps <json>`: MCP servers as JSON string
-
-#### plugin update (non-interactive, incremental)
-
-Add or remove individual components from an existing plugin without replacing it entirely.
-
-```bash
-# Add skills to existing plugin
-odc plugin update my-plugin --add-skills "new-skill-a,new-skill-b"
-
-# Remove agents
-odc plugin update my-plugin --remove-agents "old-agent"
-
-# Update metadata
-odc plugin update my-plugin --description "Updated description" --category "tools"
-
-# Combine operations
-odc plugin update my-plugin --add-skills "foo" --remove-mcps "bar"
-```
-
-Options:
-- `--description <desc>`: Update description
-- `--category <cat>`: Update category
-- `--add-skills <list>`: Add skills (comma-separated)
-- `--remove-skills <list>`: Remove skills (comma-separated)
-- `--add-commands <list>`: Add commands (comma-separated)
-- `--remove-commands <list>`: Remove commands (comma-separated)
-- `--add-agents <list>`: Add agents (comma-separated)
-- `--remove-agents <list>`: Remove agents (comma-separated)
-- `--add-mcps <json>`: Add MCP servers (JSON string)
-- `--remove-mcps <list>`: Remove MCP servers (comma-separated)
-
-#### plugin edit (interactive, TTY only)
-
-Interactive editor for existing plugins. Shows current components pre-selected for modification.
-
-```bash
-odc plugin edit my-plugin    # Edit specific plugin
-odc plugin edit              # TTY: interactive selection
-```
-
-Step-by-step prompts with pre-filled values: description → category → re-select commands/skills/agents/MCPs → confirm.
-
-Non-TTY throws E0001 with guidance to use `plugin update`.
-
-#### plugin delete
-
-```bash
-odc plugin delete my-plugin           # TTY: confirms
-odc plugin delete my-plugin --force   # Skip confirmation
-odc plugin delete                     # TTY: interactive selection
-```
-
-### marketplace
-
-Marketplace repository-level operations.
-
-```bash
-odc marketplace show
-odc marketplace open
-odc marketplace sync
-odc marketplace history [-n <count>]
-odc marketplace rollback <commit> [-f|--force]
-odc marketplace regenerate
-```
-
-#### marketplace show
-
-Outputs the full registry JSON.
-
-#### marketplace open
-
-Opens the marketplace repository in a detected IDE (Cursor, VS Code, Windsurf, Kiro, WebStorm, IDEA). If multiple IDEs are detected, prompts for selection (TTY).
-
-#### marketplace sync
-
-Pulls from and pushes to the remote marketplace repository (`git pull --rebase && git push`).
-
-#### marketplace history
-
-```bash
-odc marketplace history          # Last 20 entries
-odc marketplace history -n 5     # Last 5
-odc marketplace history --json   # JSON array
-```
-
-Returns: hash, message, date for each commit.
-
-#### marketplace rollback
-
-```bash
-odc marketplace rollback abc123f           # TTY: confirms
-odc marketplace rollback abc123f --force   # Skip confirmation
-```
-
-Performs `git revert`, regenerates registry, and commits.
-
-#### marketplace regenerate
-
-Rebuilds the registry index from current marketplace content and commits.
-
-### subscription
-
-Manage named git subscriptions for marketplace sources (clone, pull, enable/disable). Uses the same global output flags as other commands (`--json`, `--pretty`, `--no-color`).
-
-```bash
-odc subscription list
-odc subscription add --name <name> --repo <repo> [--branch <branch>]
-odc subscription remove <name>
-odc subscription enable <name>
-odc subscription disable <name>
-odc subscription refresh [name]
-```
-
-#### subscription list
-
-```bash
-odc subscription list
-odc subscription list --json
-```
-
-Human-readable: table columns **NAME**, **REPO**, **BRANCH**, **ENABLED** (`yes` / `no`), **LAST_SYNC** (registry last sync time, or `-` if not cloned yet). If there are no subscriptions, prints a short hint to use `subscription add`.
-
-#### subscription add
-
-```bash
-odc subscription add --name my-feed --repo https://github.com/org/marketplace.git
-odc subscription add --name my-feed --repo https://github.com/org/marketplace.git --branch main
-```
-
-- **Required:** `--name <name>`, `--repo <repo>` (Git remote URL).
-- **Optional:** `--branch <branch>` — branch to track (if omitted, list view shows `main` when branch is unset).
-
-After persisting the subscription, the CLI runs an initial **clone** (`refresh`). On success: single success line including “首次 clone” wording. If clone fails: still reports that the subscription was added, then prints a separate **clone failed** error with the message (non-JSON path).
-
-#### subscription remove
-
-```bash
-odc subscription remove my-feed
-```
-
-Removes the subscription by name.
-
-#### subscription enable / disable
-
-```bash
-odc subscription enable my-feed
-odc subscription disable my-feed
-```
-
-Toggles whether the subscription is enabled.
-
-#### subscription refresh
-
-```bash
-odc subscription refresh           # Refresh all subscriptions
-odc subscription refresh my-feed # Refresh one by name
-```
-
-Pulls latest code for the subscription(s). On error, prints the error message and exits with code **1**.
-
-### workspace
-
-Manage workspaces where AI agents work.
-
-```bash
-odc workspace list [--no-open]
-odc workspace show <name>
-odc workspace open <name>
-odc workspace reinit <name>
-odc workspace update <name> [--permission-mode <mode>] [--agent <agent>]
-```
-
-#### workspace list
-
-```bash
-odc workspace list              # TTY: table + interactive select to open
-odc workspace list --no-open    # TTY: table only, no interaction
-odc workspace list --json       # JSON array
-```
-
-Columns: NAME, PLUGIN, AGENT, CREATED
-
-#### workspace show
-
-```bash
-odc workspace show my-workspace
-odc workspace show my-workspace --json
-```
-
-Displays workspace details in a key-value table: Name, Plugin, Agent, Permission Mode, Init Agents, Source, Directory, Created, Updated.
-
-#### workspace open
-
-```bash
-odc workspace open my-workspace
-```
-
-Opens workspace directory in detected IDE.
-
-#### workspace reinit
-
-```bash
-odc workspace reinit my-workspace
-```
-
-Re-generates agent configuration files for the workspace. Useful after plugin updates or manual config changes.
-
-#### workspace update
-
-```bash
-odc workspace update my-workspace --permission-mode approve-all
-odc workspace update my-workspace --agent cursor
-odc workspace update my-workspace --permission-mode approve-reads --agent claude-code
-```
-
-Options:
-- `--permission-mode <mode>`: Agent permission mode (`approve-all`, `approve-reads`)
-- `--agent <agent>`: Agent type (`claude-code`, `cursor`, `kiro`)
-
-At least one option is required.
-
-## Error codes
-
-All errors follow the format: `odc v{version} — Error ({code}): {message}`
-
-| Code | Meaning | Typical fix |
-|---|---|---|
-| E0001 | Requires interactive terminal | Use `--force` for destructive ops, or `--json` for read ops |
-| E1001 | Config key not found | Check key name with `config show` |
-| E2001 | MARKETPLACE_SOURCE not configured | Run `odc config set MARKETPLACE_SOURCE <url>` |
-| E2002 | Atom not found | Inspect registry with `marketplace show --json` or verify type/name |
-| E2003 | Invalid atom type | Use: command, agent, skill, hook, mcp |
-| E3001 | Workspace not found | Check name with `workspace list --json` |
-
-## `--force` behavior
-
-Destructive operations require confirmation. `--force` (`-f`) skips it.
-
-| Command | Trigger | `--force` behavior |
-|---|---|---|
-| `atom add` | Target already exists | Overwrite without asking |
-| `atom delete` | Before deletion | Delete without asking |
-| `plugin delete` | Before deletion | Delete without asking |
-| `marketplace rollback` | Before revert | Revert without asking |
-
-In non-TTY without `--force`, these commands throw E0001.
-
-## AI agent integration
-
-The CLI is designed primarily for AI agent use. Key patterns:
-
-### Read operations (no `--force` needed)
-
-```bash
-# All of these auto-output JSON in non-TTY
-odc marketplace show
-odc plugin list
-odc workspace list
-odc workspace show my-workspace
-odc config show
-odc marketplace history
-odc subscription list
-```
-
-### Write operations (use `--force` for destructive)
-
-```bash
-odc atom add ./path --type skill --force
-odc atom delete skill old-skill --force
-odc plugin add my-plugin --description "desc" --skills "a,b"
-odc plugin delete my-plugin --force
-odc marketplace rollback abc123f --force
-odc subscription add --name feed --repo https://github.com/org/repo.git
-odc subscription refresh feed
-```
-
-### Incremental update operations (no `--force` needed)
-
-```bash
-# Update MCP server config
-odc atom update my-mcp --command new-cmd --args arg1 arg2
-
-# Set or clear agent inject marker
-odc atom set-inject my-agent init
-odc atom set-inject my-agent --remove
-
-# Add skills to existing plugin
-odc plugin update my-plugin --add-skills "new-skill"
-
-# Remove agent from plugin
-odc plugin update my-plugin --remove-agents "old-agent"
-
-# Switch workspace agent
-odc workspace update my-ws --agent cursor
-```
-
-### Chaining operations
-
-```bash
-# Add atom, then verify
-odc atom add ./new-skill.md --type skill --force
-odc atom show skill new-skill
-
-# Create plugin from atoms, then verify
-odc plugin add dev-tools --description "Dev tools" --skills "lint,format"
-odc plugin list
-```
-
-### Error handling in scripts
-
-```bash
-output=$(odc atom show skill my-skill 2>&1)
-exit_code=$?
-if [ $exit_code -ne 0 ]; then
-  # Parse error code from stderr
-  echo "$output" | grep -o 'E[0-9]*'
-fi
-```
-
-## Configuration
-
-Config is stored in `~/.odc/.env` with these keys:
-
-- `PORT`: Server port (default: 4000)
-- `MARKETPLACE_SOURCE`: Git URL to marketplace repository
-- `ENABLED_AGENTS`: Comma-separated list of enabled agents
-
-Config priority: CLI flags > environment variables > config file > defaults
-
-## Filesystem layout
-
-```
-~/.odc/
-  .env                    # Configuration
-  workspaces/             # Workspace directories
-    <workspace-name>/     # Individual workspace
-```
-
-Marketplace is a separate git repository cloned from `MARKETPLACE_SOURCE`.
-
-## Notes
-
-- All marketplace CUD operations (atom add/delete/set-inject, plugin add/delete, MCP add) are automatically git-committed with descriptive messages
-- `marketplace regenerate` rebuilds the registry index from disk; use when registry is corrupted or after manual edits
-- `marketplace sync` does `git pull --rebase && git push` — ensure your remote is configured
-- `workspace create` and `workspace delete` are intentionally NOT provided in CLI for safety — use Web UI instead
-- `marketplace repodir` is intentionally NOT provided — use `marketplace open` to access via IDE
+| 列出所有插件 | `odc plugin list --json` |
+| 查看工作空间详情 | `odc workspace show <name> --json` |
+| 查看 atom 内容 | `odc atom show <type> <name>` |
+| 列出 atom 文件 | `odc atom files <type> <name>` |
+| 从路径/URL 添加 atom | `odc atom add <source> --type <type> --force` |
+| 删除 atom | `odc atom delete <type> <name> --force` |
+| 创建插件 | `odc plugin add <name> --description "..." --skills "a,b"` |
+| 更新插件 atoms | `odc plugin update <name> --add-skills "x" --remove-agents "y"` |
+| 合并订阅源到本地 | `odc plugin merge <plugin> --source <subscription>` |
+| 重建注册表 | `odc marketplace regenerate` |
+| 完整注册表导出 | `odc marketplace show` |
+| 列出订阅源 | `odc subscription list --json` |
+| 刷新订阅源 | `odc subscription refresh [name]` |
+| 列出工作空间 | `odc workspace list --json` |
+| 初始化工作空间 | `odc workspace init <plugin> [--source <source>]` |
+| 重新初始化工作空间 | `odc workspace reinit <name>` |
+| 为工作空间添加插件 | `odc workspace add-plugin <ws> <plugin> [--subscription-name <name>]` |
+| 从工作空间移除插件 | `odc workspace remove-plugin <ws> <plugin> [--subscription-name <name>]` |
+
+完整命令参数请读取本文档顶部列出的对应参考文件。
