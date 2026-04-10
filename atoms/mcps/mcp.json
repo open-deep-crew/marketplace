@@ -5,8 +5,11 @@
       "url": "https://mcp.deepwiki.com/mcp"
     },
     "claude-teams": {
-      "command": "uvx",
+      "command": "uv",
       "args": [
+        "--directory",
+        "D:\\ai\\github\\acpx-teams-mcp",
+        "run",
         "acpx-teams"
       ],
       "disabled": false
