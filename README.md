@@ -123,7 +123,7 @@ cat > atoms/mcps/mcp.json << 'EOF'
     },
     "odc-teams": {
       "command": "uvx",
-      "args": ["acpx-teams"],
+      "args": ["--upgrade", "acpx-teams"],
       "disabled": false
     }
   }

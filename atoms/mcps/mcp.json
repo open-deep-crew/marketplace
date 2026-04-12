@@ -7,6 +7,7 @@
     "odc-teams": {
       "command": "uvx",
       "args": [
+        "--upgrade",
         "acpx-teams"
       ],
       "disabled": false
