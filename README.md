@@ -121,9 +121,9 @@ cat > atoms/mcps/mcp.json << 'EOF'
       "type": "http",
       "url": "https://mcp.deepwiki.com/mcp"
     },
-    "claude-teams": {
+    "odc-teams": {
       "command": "uvx",
-      "args": ["acpx-teams"],
+      "args": ["--upgrade", "acpx-teams"],
       "disabled": false
     }
   }

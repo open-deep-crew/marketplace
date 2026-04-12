@@ -44,9 +44,10 @@
         "./atoms/agents/opendeepcrew-product-dev.md"
       ],
       "mcpServers": {
-        "claude-teams": {
+        "odc-teams": {
           "command": "uvx",
           "args": [
+            "--upgrade",
             "acpx-teams"
           ],
           "disabled": false
@@ -55,7 +56,7 @@
     },
     {
       "name": "default_bot",
-      "description": "飞书bot私聊流程",
+      "description": "IM Bot私聊流程",
       "category": "default",
       "commands": [],
       "skills": [
@@ -98,9 +99,10 @@
         "./atoms/agents/superpowers-dev.md"
       ],
       "mcpServers": {
-        "claude-teams": {
+        "odc-teams": {
           "command": "uvx",
           "args": [
+            "--upgrade",
             "acpx-teams"
           ],
           "disabled": false
