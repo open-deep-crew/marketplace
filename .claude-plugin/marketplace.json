@@ -108,6 +108,19 @@
           "disabled": false
         }
       }
+    },
+    {
+      "name": "film-creation",
+      "description": "电影创作工作流，涵盖导演、编剧、分镜、摄影、美术、表演全流程",
+      "category": "creation",
+      "commands": [],
+      "skills": [],
+      "hooks": [],
+      "agents": [
+        "./atoms/agents/creative-architect.md",
+        "./atoms/agents/prompt-alchemist.md"
+      ],
+      "mcpServers": {}
     }
   ]
 }

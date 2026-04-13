@@ -1,0 +1,513 @@
+{
+  "metadata": {
+    "generatedAt": "2026-03-29T00:32:08.129Z",
+    "version": "1.0.0"
+  },
+  "stats": {
+    "totalAtoms": 29,
+    "totalPlugins": 6,
+    "byType": {
+      "commands": 0,
+      "agents": 7,
+      "skills": 18,
+      "hooks": 1,
+      "mcps": 3
+    }
+  },
+  "atoms": {
+    "commands": [],
+    "agents": [
+      {
+        "type": "agent",
+        "name": "creative-architect",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\agents\\creative-architect.md",
+        "usedBy": [
+          "film-creation"
+        ],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "agent",
+        "name": "matteo-collina",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\agents\\matteo-collina.md",
+        "usedBy": [
+          "opendeepcrew-bug-fix",
+          "opendeepcrew-product-dev"
+        ],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "agent",
+        "name": "opendeepcrew-bug-fixer",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\agents\\opendeepcrew-bug-fixer.md",
+        "usedBy": [
+          "opendeepcrew-bug-fix"
+        ],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "agent",
+        "name": "opendeepcrew-product-dev",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\agents\\opendeepcrew-product-dev.md",
+        "usedBy": [
+          "opendeepcrew-product-dev"
+        ],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "agent",
+        "name": "opendeepcrew-qa",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\agents\\opendeepcrew-qa.md",
+        "usedBy": [
+          "opendeepcrew-qa"
+        ],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "agent",
+        "name": "prompt-alchemist",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\agents\\prompt-alchemist.md",
+        "usedBy": [
+          "film-creation"
+        ],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "agent",
+        "name": "superpowers-dev",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\agents\\superpowers-dev.md",
+        "usedBy": [
+          "superpowers-dev"
+        ],
+        "source": {
+          "type": "local"
+        }
+      }
+    ],
+    "skills": [
+      {
+        "type": "skill",
+        "name": "agent-creator",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\agent-creator",
+        "usedBy": [
+          "default_bot"
+        ],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "brainstorming",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\brainstorming",
+        "usedBy": [
+          "opendeepcrew-product-dev",
+          "superpowers-dev"
+        ],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "bugfix",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\bugfix",
+        "usedBy": [
+          "opendeepcrew-bug-fix"
+        ],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "creative-workflow",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\creative-workflow",
+        "usedBy": [],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "executing-plans",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\executing-plans",
+        "usedBy": [
+          "opendeepcrew-product-dev",
+          "superpowers-dev"
+        ],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "film-art-direction",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\film-art-direction",
+        "usedBy": [],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "film-directing",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\film-directing",
+        "usedBy": [],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "film-narrative",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\film-narrative",
+        "usedBy": [],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "film-performance",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\film-performance",
+        "usedBy": [],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "film-visual-language",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\film-visual-language",
+        "usedBy": [],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "git-workspace-init",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\git-workspace-init",
+        "usedBy": [
+          "opendeepcrew-bug-fix",
+          "opendeepcrew-product-dev",
+          "superpowers-dev"
+        ],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "nano-banana-pro",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\nano-banana-pro",
+        "usedBy": [],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "nano-banana-prompts",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\nano-banana-prompts",
+        "usedBy": [],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "opendeepcrew-cli",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\opendeepcrew-cli",
+        "usedBy": [
+          "default_bot"
+        ],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "seedance-prompts",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\seedance-prompts",
+        "usedBy": [],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "skill-creator",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\skill-creator",
+        "usedBy": [
+          "opendeepcrew-bug-fix",
+          "default_bot"
+        ],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "wiki-generator",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\wiki-generator",
+        "usedBy": [],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "skill",
+        "name": "writing-plans",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\skills\\writing-plans",
+        "usedBy": [
+          "opendeepcrew-product-dev",
+          "superpowers-dev"
+        ],
+        "source": {
+          "type": "local"
+        }
+      }
+    ],
+    "hooks": [
+      {
+        "type": "hook",
+        "name": "session-start-chinese",
+        "path": "C:\\Users\\y2830\\.opendeepcrew\\.marketplace-cache\\repo\\atoms\\hooks\\session-start-chinese.sh",
+        "usedBy": [],
+        "source": {
+          "type": "local"
+        }
+      }
+    ],
+    "mcps": [
+      {
+        "type": "mcp",
+        "name": "claude-teams",
+        "config": {
+          "command": "uvx",
+          "args": [
+            "acpx-teams"
+          ],
+          "disabled": false
+        },
+        "usedBy": [
+          "opendeepcrew-product-dev",
+          "superpowers-dev"
+        ],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "mcp",
+        "name": "deepwiki",
+        "config": {
+          "type": "http",
+          "url": "https://mcp.deepwiki.com/mcp"
+        },
+        "usedBy": [],
+        "source": {
+          "type": "local"
+        }
+      },
+      {
+        "type": "mcp",
+        "name": "promptx",
+        "config": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "@promptx/mcp-server"
+          ]
+        },
+        "usedBy": [],
+        "source": {
+          "type": "local"
+        }
+      }
+    ]
+  },
+  "plugins": [
+    {
+      "name": "opendeepcrew-bug-fix",
+      "description": "opendeepcrew bugfix 工作流",
+      "category": "development",
+      "commands": [],
+      "skills": [
+        "./atoms/skills/skill-creator",
+        "./atoms/skills/git-workspace-init",
+        "./atoms/skills/bugfix"
+      ],
+      "hooks": [],
+      "agents": [
+        "./atoms/agents/matteo-collina.md",
+        "./atoms/agents/opendeepcrew-bug-fixer.md"
+      ],
+      "mcpServers": {},
+      "atomsCount": {
+        "commands": 0,
+        "agents": 2,
+        "skills": 3,
+        "hooks": 0,
+        "mcps": 0
+      },
+      "source": {
+        "type": "local"
+      }
+    },
+    {
+      "name": "opendeepcrew-product-dev",
+      "description": "opendeepcrew 需求开发",
+      "category": "development",
+      "commands": [],
+      "skills": [
+        "./atoms/skills/brainstorming",
+        "./atoms/skills/executing-plans",
+        "./atoms/skills/writing-plans",
+        "./atoms/skills/git-workspace-init"
+      ],
+      "hooks": [],
+      "agents": [
+        "./atoms/agents/matteo-collina.md",
+        "./atoms/agents/opendeepcrew-product-dev.md"
+      ],
+      "mcpServers": {
+        "claude-teams": {
+          "command": "uvx",
+          "args": [
+            "acpx-teams"
+          ],
+          "disabled": false
+        }
+      },
+      "atomsCount": {
+        "commands": 0,
+        "agents": 2,
+        "skills": 4,
+        "hooks": 0,
+        "mcps": 1
+      },
+      "source": {
+        "type": "local"
+      }
+    },
+    {
+      "name": "default_bot",
+      "description": "飞书bot私聊流程",
+      "category": "default",
+      "commands": [],
+      "skills": [
+        "./atoms/skills/skill-creator",
+        "./atoms/skills/agent-creator",
+        "./atoms/skills/opendeepcrew-cli"
+      ],
+      "hooks": [],
+      "agents": [],
+      "mcpServers": {},
+      "atomsCount": {
+        "commands": 0,
+        "agents": 0,
+        "skills": 3,
+        "hooks": 0,
+        "mcps": 0
+      },
+      "source": {
+        "type": "local"
+      }
+    },
+    {
+      "name": "opendeepcrew-qa",
+      "description": "opendeepcrew问答",
+      "category": "wiki",
+      "commands": [],
+      "skills": [],
+      "hooks": [],
+      "agents": [
+        "./atoms/agents/opendeepcrew-qa.md"
+      ],
+      "mcpServers": {},
+      "atomsCount": {
+        "commands": 0,
+        "agents": 1,
+        "skills": 0,
+        "hooks": 0,
+        "mcps": 0
+      },
+      "source": {
+        "type": "local"
+      }
+    },
+    {
+      "name": "superpowers-dev",
+      "description": "通用需求开发工作流，支持任意Git仓库",
+      "category": "development",
+      "commands": [],
+      "skills": [
+        "./atoms/skills/brainstorming",
+        "./atoms/skills/executing-plans",
+        "./atoms/skills/writing-plans",
+        "./atoms/skills/git-workspace-init"
+      ],
+      "hooks": [],
+      "agents": [
+        "./atoms/agents/superpowers-dev.md"
+      ],
+      "mcpServers": {
+        "claude-teams": {
+          "command": "uvx",
+          "args": [
+            "acpx-teams"
+          ],
+          "disabled": false
+        }
+      },
+      "atomsCount": {
+        "commands": 0,
+        "agents": 1,
+        "skills": 4,
+        "hooks": 0,
+        "mcps": 1
+      },
+      "source": {
+        "type": "local"
+      }
+    },
+    {
+      "name": "film-creation",
+      "description": "电影创作工作流，涵盖导演、编剧、分镜、摄影、美术、表演全流程",
+      "category": "creation",
+      "commands": [],
+      "skills": [],
+      "hooks": [],
+      "agents": [
+        "./atoms/agents/creative-architect.md",
+        "./atoms/agents/prompt-alchemist.md"
+      ],
+      "mcpServers": {},
+      "atomsCount": {
+        "commands": 0,
+        "agents": 2,
+        "skills": 0,
+        "hooks": 0,
+        "mcps": 0
+      },
+      "source": {
+        "type": "local"
+      }
+    }
+  ]
+}

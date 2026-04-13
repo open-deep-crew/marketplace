@@ -1,0 +1,19 @@
+{
+  "enabled": true,
+  "name": "Marketplace Auto Regenerate",
+  "description": "保存 atoms 或 plugins 相关文件时，自动运行 opendeepcrew marketplace regenerate 更新 registry",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "atoms/**/*.md",
+      "atoms/**/*.json",
+      "atoms/**/*.sh",
+      "public/generated/registry.json"
+    ]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "opendeepcrew marketplace regenerate"
+  }
+}

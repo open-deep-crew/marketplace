@@ -1,0 +1,16 @@
+{
+  "enabled": true,
+  "name": "Skill Creator Review",
+  "description": "新建 SKILL.md 文件后，自动对照 skill-creator 原则检查内容质量，必要时提出修改建议",
+  "version": "1",
+  "when": {
+    "type": "fileCreated",
+    "patterns": [
+      "atoms/skills/**/SKILL.md"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "一个新的 SKILL.md 刚刚被创建。请对照 skill-creator 的核心原则检查它：1. description 是否清楚说明了何时使用这个 skill？2. 正文是否只包含 Claude 不具备的上下文，没有解释显而易见的东西？3. 是否有不必要的冗余内容可以删除？4. 如果有 references 文件，SKILL.md 正文是否保持了精简？如果发现问题，直接指出并建议修改。"
+  }
+}
